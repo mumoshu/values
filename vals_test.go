@@ -116,3 +116,37 @@ kind: Secret
 
 	require.Equal(t, expected, buf.String())
 }
+
+func TestEvalIntegerBool(t *testing.T) {
+	var yamlDocs = `
+---
+Integer: 1
+ResultInteger: ref+file://secrets.yaml#/Integer
+Bool: true
+ResultBool: ref+file://secrets.yaml#/Bool
+`
+	var expected = `Bool: true
+Integer: 1
+ResultBool: "true"
+ResultInteger: "1"
+`
+
+	tmpFile, err := os.Create("secrets.yaml")
+	defer os.Remove(tmpFile.Name())
+	require.NoError(t, err)
+
+	_, err = tmpFile.WriteString(yamlDocs)
+	require.NoError(t, err)
+
+	input, err := Inputs(tmpFile.Name())
+	require.NoError(t, err)
+
+	nodes, err := EvalNodes(input, Options{})
+	require.NoError(t, err)
+	buf := new(strings.Builder)
+
+	err = Output(buf, "", nodes)
+	require.NoError(t, err)
+
+	require.Equal(t, expected, buf.String())
+}

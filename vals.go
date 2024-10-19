@@ -410,6 +410,10 @@ func (r *Runtime) prepare() (*expansion.ExpandRegexMatch, error) {
 				for i, k := range keys {
 					newobj := map[string]interface{}{}
 					switch t := obj[k].(type) {
+					case int:
+						return fmt.Sprint(t), nil
+					case bool:
+						return fmt.Sprint(t), nil
 					case string:
 						if i != len(keys)-1 {
 							return "", fmt.Errorf("unexpected type of value for key at %d=%s in %v: expected map[string]interface{}, got %v(%T)", i, k, keys, t, t)
