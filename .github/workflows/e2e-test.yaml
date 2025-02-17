@@ -1,0 +1,31 @@
+name: E2E test 
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  e2e-test:
+    runs-on: ubuntu-latest
+    env:
+      SKIP_TESTS: true 
+    steps:
+    - name: Create k8s Kind Cluster
+      uses: helm/kind-action@v1.12.0
+      with:
+        cluster_name: cluster
+    - name: Set k8s provider
+      run: |
+        kubectl create namespace test-namespace
+        kubectl create secret generic mysecret -n test-namespace --from-literal=key=p4ssw0rd
+        kubectl create configmap myconfigmap -n test-namespace --from-literal=key=configValue
+    - uses: actions/checkout@v4
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version-file: 'go.mod'
+        cache: true
+    - name: test
+      run: kubectl cluster-info 
